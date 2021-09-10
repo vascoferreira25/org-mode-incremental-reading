@@ -90,8 +90,8 @@ The template of an Anki card is the following:
 ,#+END_ANKI
 #+END_SRC
 
-This way all the cards in the same place of the notes and can easily be updated
-and sent to Anki to learn.
+This way all the cards will be in the same place of the notes and can easily be
+updated and sent to Anki to learn.
 
 * Installation
 
@@ -112,3 +112,17 @@ There are the steps to add/update cards from org-mode into Anki:
 2. Create a card by using the snippets provided or writing the special block.
 3. Open Anki and make sure you have the ~anki-connect~ addon.
 4. Use the function ~incremental-reading/parse-cards~.
+
+* How it looks like?
+
+[[./img/example_1.png]]
+
+[[./img/example_2.png]]
+
+[[./img/example_3.png]]
+
+[[./img/example_4.png]]
+
+[[./img/example_5.png]]
+
+[[./img/example_6.png]]
