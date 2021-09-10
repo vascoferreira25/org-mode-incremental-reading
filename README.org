@@ -1,0 +1,114 @@
+#+title: Incremental Reading + Anki for org-mode
+
+Incremental Reading is a feature of SuperMemo (the beginning of Spaced
+Repetition Software) where you breakdown an article into small parts and then
+use that to learn/memorize the contents.
+
+Anki is an open-source software for Spaced Repetition where you create
+flashcards and then learn them.
+
+There is already on package to connect org-mode to Anki and create flashcards
+based on a specific tree structure. The package is called ~anki-editor~.
+
+However, my notes don't follow that tree structure. Also, I don't want to
+create a separate file to create Anki cards as that would make the notes and
+cards separate from each other. I think it would be better to create a block
+right below my notes that would then be sent to Anki. This way I won't ever
+forget to update my cards when I also update my notes.
+
+This is an example of one of my notes:
+
+#+BEGIN_SRC org
+,#+title: Return Over Investment
+
+Return Over Investment or ~ROI~ is a measure of how well is the investment of a
+company going.
+
+- Tags ::
+  - [[id:e1c36403-ba59-45e7-915f-9dd354271ae2][Accounting]]
+
+The ROI is made up of two [[id:c53ffe1e-e390-482f-8f13-e857faf58d38][Metric]]:
+
+- Net profit over a period of time,
+- Cost of investment
+
+,#+ATTR_ID: 1631303347034
+,#+ATTR_DECK: Test
+,#+ATTR_TYPE: Cloze
+,#+ATTR_TAGS: incremental-reading emacs
+,#+BEGIN_ANKI org
+,#+ATTR_FIELD: Text
+,#+BEGIN_FIELD
+{{c1::Return Over Investment or ~ROI~::Formula}} is a measure of how well the
+investment of a company is going.
+,#+END_FIELD
+,#+END_ANKI
+
+,* Common formula
+
+$$ROI = \frac{(G - C)}{C}$$
+
+In this formula, ~G~ represents the financial gains you expect from the
+project, and ~C~ represents the up front and ongoing costs of your investment
+in the project.
+
+,#+ATTR_ID: 1631303346989
+,#+ATTR_DECK: Test
+,#+ATTR_TYPE: Basic
+,#+ATTR_TAGS: incremental-reading emacs
+,#+BEGIN_ANKI org
+,#+ATTR_FIELD: Front
+,#+BEGIN_FIELD
+Return Over Investment formula
+,#+END_FIELD
+
+,#+ATTR_FIELD: Back
+,#+BEGIN_FIELD
+$$ROI = \frac{(G - C)}{C}$$
+
+In this formula, ~G~ represents the financial gains you expect from the
+project, and ~C~ represents the up front and ongoing costs of your investment
+in the project.
+,#+END_FIELD
+,#+END_ANKI
+#+END_SRC
+
+The template of an Anki card is the following:
+
+#+BEGIN_SRC 
+#+ATTR_DECK: Test
+#+ATTR_TYPE: Cloze
+#+ATTR_TAGS: incremental-reading emacs
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Text
+#+BEGIN_FIELD
+#+END_FIELD
+
+#+ATTR_FIELD: Back Extra
+#+BEGIN_FIELD
+#+END_FIELD
+#+END_ANKI
+#+END_SRC
+
+This way all the cards in the same place of the notes and can easily be updated
+and sent to Anki to learn.
+
+* Installation
+
+To install this back-end, clone this repo into your packages or private folder
+in your ~~/.emacs.d~ directory. Or use your package manager. For example, ~straight.el~:
+
+#+BEGIN_SRC emacs-lisp
+(straight-use-package
+ '(org-mode-incremental-reading
+   :type git :host github :repo "vascoferreira25/org-mode-incremental-reading"))
+#+END_SRC
+
+* How to use
+
+There are the steps to add/update cards from org-mode into Anki:
+
+1. Load ~anki-editor-mode~.
+2. Create a card by using the snippets provided or writing the special block.
+3. Open Anki and make sure you have the ~anki-connect~ addon.
+4. Use the function ~incremental-reading/parse-cards~.

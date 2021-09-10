@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: incremental-reading
+# key: <ir-basic
+# group: incremental-reading
+# --
+#+ATTR_DECK: ${1:Default}
+#+ATTR_TYPE: ${2:Basic}
+#+ATTR_TAGS: ${3:incremental-reading}
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Front
+#+BEGIN_FIELD
+${4:Text {{c1::cloze}}}
+#+END_FIELD
+
+#+ATTR_FIELD: Back
+#+BEGIN_FIELD
+${5:Back}
+#+END_FIELD
+#+END_ANKI
+$0
