@@ -76,18 +76,18 @@ in the project.
 The template of an Anki card is the following:
 
 #+BEGIN_SRC 
-#+ATTR_DECK: Test
-#+ATTR_TYPE: Cloze
-#+ATTR_TAGS: incremental-reading emacs
-#+BEGIN_ANKI org
-#+ATTR_FIELD: Text
-#+BEGIN_FIELD
-#+END_FIELD
+,#+ATTR_DECK: Test
+,#+ATTR_TYPE: Cloze
+,#+ATTR_TAGS: incremental-reading emacs
+,#+BEGIN_ANKI org
+,#+ATTR_FIELD: Text
+,#+BEGIN_FIELD
+,#+END_FIELD
 
-#+ATTR_FIELD: Back Extra
-#+BEGIN_FIELD
-#+END_FIELD
-#+END_ANKI
+,#+ATTR_FIELD: Back Extra
+,#+BEGIN_FIELD
+,#+END_FIELD
+,#+END_ANKI
 #+END_SRC
 
 This way all the cards in the same place of the notes and can easily be updated
