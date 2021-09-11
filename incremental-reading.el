@@ -26,7 +26,28 @@
 (require 'request)
 
 
-(defun incremental-reading/transform-field (field)
+(defgroup incremental-reading nil
+  "Customizations for incremental-reading."
+  :group 'org)
+
+
+(defcustom incremental-reading-default-deck
+  "Default"
+  "The default deck to be used in the
+`incremental-reading-extract-basic' and
+`incremental-reading-extract-cloze' functions."
+  :type '(string))
+
+
+(defcustom incremental-reading-default-tags
+  "incremental-reading"
+  "The default tags to be used in the
+`incremental-reading-extract-basic' and
+`incremental-reading-extract-cloze' functions."
+  :type '(string))
+
+
+(defun incremental-reading--transform-field (field)
   "Transform a special block FIELD to a field in the anki card
 and return a list with the `field-name' and the `parsed-contents'."
   (let* ((field-name (-first-item (org-element-property :attr_field field)))
@@ -49,31 +70,31 @@ and return a list with the `field-name' and the `parsed-contents'."
     `(,field-name . ,parsed-contents)))
 
 
-(defun incremental-reading/get-fields (anki-block)
+(defun incremental-reading--get-fields (anki-block)
   "Return all the fields inside an ANKI-BLOCK."
   (org-element-map anki-block 'special-block
     (lambda (field)
       (when (s-equals? "FIELD" (s-upcase (org-element-property :type field)))
-        (incremental-reading/transform-field field)))))
+        (incremental-reading--transform-field field)))))
 
 
-(defun incremental-reading/request-update-card (id fields tags)
+(defun incremental-reading--request-update-card (id fields tags)
   "Send an http request to the anki-connect addon with the ID,
 FIELDS and TAGS of the card."
   (request
-    "http://127.0.0.1:8765"
-    :type "POST"
-    :sync t
-    :data (json-encode `(("action" . "updateNoteFields")
-                         ("version" . "6")
-                         ("params" . (("note" . (("id" . ,(string-to-number id))
-                                                 ("fields" . ,fields)
-                                                 ("tags" . (,tags))))))))
-    :headers '(("Content-Type" . "application/json"))
-    :parser 'json-read
-    :success (cl-function
-              (lambda (&key response &allow-other-keys)
-                (message "Updated card.")))))
+   "http://127.0.0.1:8765"
+   :type "POST"
+   :sync t
+   :data (json-encode `(("action" . "updateNoteFields")
+                        ("version" . "6")
+                        ("params" . (("note" . (("id" . ,(string-to-number id))
+                                                ("fields" . ,fields)
+                                                ("tags" . (,tags))))))))
+   :headers '(("Content-Type" . "application/json"))
+   :parser 'json-read
+   :success (cl-function
+             (lambda (&key response &allow-other-keys)
+               (message "Updated card.")))))
 
 
 (defun incremental-reading/add-note-id (anki-block id)
@@ -82,32 +103,32 @@ FIELDS and TAGS of the card."
   (insert (format "#+ATTR_ID: %s\n" id)))
 
 
-(defun incremental-reading/request-add-card (deck card-type fields tags anki-block)
+(defun incremental-reading--request-add-card (deck card-type fields tags anki-block)
   "Send an http request to the anki-connect addon with DECK,
 CARD-TYPE, FIELDS, TAGS and ANKI-BLOCK of the card to add. If it
 is successful, update the ANKI-BLOCK id."
   (request
-    "http://127.0.0.1:8765"
-    :type "POST"
-    :sync t
-    :data (json-encode `(("action" . "addNote")
-                         ("version" . "6")
-                         ("params" . (("note" . (("deckName" . ,deck)
-                                                 ("modelName" . ,card-type)
-                                                 ("fields" . ,fields)
-                                                 ("tags" . (,tags))))))))
-    :headers '(("Content-Type" . "application/json"))
-    :parser 'json-read
-    :success (cl-function
-              (lambda (&key response &allow-other-keys)
-                (message "Added card.")
-                (incremental-reading/add-note-id
-                 anki-block
-                 (cdr (assoc 'result (request-response-data response))))))))
+   "http://127.0.0.1:8765"
+   :type "POST"
+   :sync t
+   :data (json-encode `(("action" . "addNote")
+                        ("version" . "6")
+                        ("params" . (("note" . (("deckName" . ,deck)
+                                                ("modelName" . ,card-type)
+                                                ("fields" . ,fields)
+                                                ("tags" . (,tags))))))))
+   :headers '(("Content-Type" . "application/json"))
+   :parser 'json-read
+   :success (cl-function
+             (lambda (&key response &allow-other-keys)
+               (message "Added card.")
+               (incremental-reading/add-note-id
+                anki-block
+                (cdr (assoc 'result (request-response-data response))))))))
 
 
 ;;;###autoload
-(defun incremental-reading/parse-cards ()
+(defun incremental-reading-parse-cards ()
   "Parse all the Anki special-blocks in the current buffer and
 send them to Anki through http to the anki-connect addon."
   (interactive)
@@ -127,14 +148,16 @@ send them to Anki through http to the anki-connect addon."
                                (org-element-property :begin other)) anki-blocks))
   ;; Process each anki-block
   (-map (lambda (anki-block)
-          (let* ((anki-card-fields (incremental-reading/get-fields anki-block))
+          (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
                  (id (-first-item (org-element-property :attr_id anki-block)))
                  (deck (-first-item (org-element-property :attr_deck anki-block)))
                  (card-type (-first-item (org-element-property :attr_type anki-block)))
                  (tags (-first-item (org-element-property :attr_tags anki-block))))
             (if id
-                (incremental-reading/request-update-card id anki-card-fields tags)
-              (incremental-reading/request-add-card deck card-type anki-card-fields tags anki-block)))
+                (incremental-reading--request-update-card id anki-card-fields tags)
+              (incremental-reading--request-add-card deck card-type anki-card-fields tags anki-block)))
           )
         anki-blocks))
 
+
+(provide 'incremental-reading)
