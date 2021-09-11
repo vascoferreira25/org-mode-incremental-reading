@@ -5,7 +5,7 @@
 ;; Created: 10 Sep 2021
 ;; Keywords: anki anki-editor incremental-reading supermemo
 ;; Homepage: https://github.com/vascoferreira25/incremental-reading
-;; Package-Requires: ((org) (ox-html) (anki-editor) (dash) (request))
+;; Package-Requires: ((org) (ox-html) (anki-editor) (request))
 
 ;; This file is not part of GNU Emacs.
 
@@ -21,7 +21,6 @@
 (require 'org)
 (require 'ox-html)
 (require 'anki-editor)
-(require 'dash)
 (require 'request)
 
 
@@ -84,36 +83,6 @@
   :type '(string))
 
 
-(defun incremental-reading-extract-basic ()
-  "Extract current region into a basic anki card."
-  (interactive)
-  (let* ((element (org-element-at-point))
-         (selection-start (region-beginning))
-         (selection-end (region-end)))
-    (goto-char (org-element-property :end element))
-    (insert (format incremental-reading--basic-template
-                    incremental-reading-default-deck
-                    incremental-reading-default-tags
-                    (buffer-substring-no-properties
-                     selection-start
-                     selection-end)))))
-
-
-(defun incremental-reading-extract-cloze ()
-  "Extract current region into a cloze anki card."
-  (interactive)
-  (let* ((element (org-element-at-point))
-         (selection-start (region-beginning))
-         (selection-end (region-end)))
-    (goto-char (org-element-property :end element))
-    (insert (format incremental-reading--cloze-template
-                    incremental-reading-default-deck
-                    incremental-reading-default-tags
-                    (buffer-substring-no-properties
-                     selection-start
-                     selection-end)))))
-
-
 (defun incremental-reading--transform-field-content (content)
   "Transform the CONTENT of a field into html."
   (let* ((contents-begin (org-element-property :contents-begin content))
@@ -142,9 +111,9 @@ and return a list with the field-name and the parsed-contents."
          (parsed-contents
           ;; Transform all the separate paragraphs and elements to a single
           ;; string.
-          (--reduce (format "%s\n%s" acc it)
-                    (mapcar #'incremental-reading--transform-field-content
-                            field-contents))))
+          (cl-reduce (lambda (a b) (format "%s\n%s" a b))
+                     (mapcar #'incremental-reading--transform-field-content
+                             field-contents))))
     `(,field-name . ,parsed-contents)))
 
 
@@ -160,19 +129,19 @@ and return a list with the field-name and the parsed-contents."
   "Send an http request to the anki-connect addon with the ID,
 FIELDS and TAGS of the card."
   (request
-   "http://127.0.0.1:8765"
-   :type "POST"
-   :sync t
-   :data (json-encode `(("action" . "updateNoteFields")
-                        ("version" . "6")
-                        ("params" . (("note" . (("id" . ,(string-to-number id))
-                                                ("fields" . ,fields)
-                                                ("tags" . (,tags))))))))
-   :headers '(("Content-Type" . "application/json"))
-   :parser 'json-read
-   :success (cl-function
-             (lambda (&key response &allow-other-keys)
-               (message "Updated card.")))))
+    "http://127.0.0.1:8765"
+    :type "POST"
+    :sync t
+    :data (json-encode `(("action" . "updateNoteFields")
+                         ("version" . "6")
+                         ("params" . (("note" . (("id" . ,(string-to-number id))
+                                                 ("fields" . ,fields)
+                                                 ("tags" . (,tags))))))))
+    :headers '(("Content-Type" . "application/json"))
+    :parser 'json-read
+    :success (cl-function
+              (lambda (&key response &allow-other-keys)
+                (message "Updated card.")))))
 
 
 (defun incremental-reading/add-note-id (anki-block id)
@@ -223,8 +192,11 @@ send them to Anki through http to the anki-connect addon."
         (setq anki-blocks (cons special-block anki-blocks)))))
   ;; Avoid errors when inserting the id by sorting the elements from bottom to
   ;; top
-  (setq anki-blocks (--sort (> (org-element-property :begin it)
-                               (org-element-property :begin other)) anki-blocks))
+  (setq anki-blocks (sort (copy-sequence anki-blocks)
+                          (lambda (a b)
+                            (let* ((a-begin (org-element-property :begin a))
+                                   (b-begin (org-element-property :begin b)))
+                              (> a-begin b-begin)))))
   ;; Process each anki-block
   (mapcar (lambda (anki-block)
             (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
@@ -239,6 +211,38 @@ send them to Anki through http to the anki-connect addon."
           anki-blocks)
   ;; Restore cursor position
   (goto-char initial-position))
+
+
+;;;###autoload
+(defun incremental-reading-extract-basic ()
+  "Extract current region into a basic anki card."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--basic-template
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (buffer-substring-no-properties
+                     selection-start
+                     selection-end)))))
+
+
+;;;###autoload
+(defun incremental-reading-extract-cloze ()
+  "Extract current region into a cloze anki card."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--cloze-template
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (buffer-substring-no-properties
+                     selection-start
+                     selection-end)))))
 
 
 (provide 'incremental-reading)
