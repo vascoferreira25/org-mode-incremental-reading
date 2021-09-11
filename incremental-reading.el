@@ -111,6 +111,7 @@ is successful, update the ANKI-BLOCK id."
   "Parse all the Anki special-blocks in the current buffer and
 send them to Anki through http to the anki-connect addon."
   (interactive)
+  (goto-char (point-max))
   ;; Store a reversed list of the special blocks.
   ;; This is used to write the ids from bottom to top
   (setq anki-blocks (list))
@@ -120,6 +121,10 @@ send them to Anki through http to the anki-connect addon."
       ;; If it is a anki block, get the fields of the card
       (when (s-equals? "ANKI" (s-upcase (org-element-property :type special-block)))
         (setq anki-blocks (cons special-block anki-blocks)))))
+  ;; Avoid errors when inserting the id by sorting the elements from bottom to
+  ;; top
+  (setq anki-blocks (--sort (> (org-element-property :begin it)
+                               (org-element-property :begin other)) anki-blocks))
   ;; Process each anki-block
   (-map (lambda (anki-block)
           (let* ((anki-card-fields (incremental-reading/get-fields anki-block))
