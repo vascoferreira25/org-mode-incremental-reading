@@ -106,12 +106,15 @@ in your ~~/.emacs.d~ directory. Or use your package manager. For example, ~strai
 
 * How to use
 
-There are the steps to add/update cards from org-mode into Anki:
+These are the steps to add/update/extract cards from org-mode into Anki:
 
 1. Load ~anki-editor-mode~.
 2. Go to your notes and either use the snippets to create a block or use the
    ~incremental-reading-extract-basic~ or ~incremental-reading-extract-cloze~
    to extract the text and turn it into a card.
+   - Set the ~incremental-reading-default-deck~ and
+     ~incremental-reading-default-tags~ so you won't need to change them after
+     extracting your notes.
    - For ~cloze~ cards don't forget to create a cloze with
       ~anki-editor-cloze-region~.
 3. Open Anki and make sure you have the ~anki-connect~ add-on.
