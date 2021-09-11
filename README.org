@@ -120,7 +120,10 @@ These are the steps to add/update/extract cards from org-mode into Anki:
 3. Open Anki and make sure you have the ~anki-connect~ add-on.
 4. Use the function ~incremental-reading-parse-cards~.
 
-*Note*: sometimes errors occur when sending attachments (images and files) to
+*Note 1*: almost always, the first time you try to parse the cards after loading
+Emacs, it will fail. Try again and it will work.
+
+*Note 2*: sometimes errors occur when sending attachments (images and files) to
 Anki. When that happens, remode the image, parse the cards, add the image
 again and parse.
 
