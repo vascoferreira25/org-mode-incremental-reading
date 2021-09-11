@@ -109,9 +109,13 @@ in your ~~/.emacs.d~ directory. Or use your package manager. For example, ~strai
 There are the steps to add/update cards from org-mode into Anki:
 
 1. Load ~anki-editor-mode~.
-2. Create a card by using the snippets provided or writing the special block.
-3. Open Anki and make sure you have the ~anki-connect~ addon.
+2. Create a card by using the snippets provided or write the special block.
+3. Open Anki and make sure you have the ~anki-connect~ add-on.
 4. Use the function ~incremental-reading/parse-cards~.
+
+*Note*: sometimes errors occur when sending attachments (images and files) to
+Anki. When that happens, remode the image, parse the cards, add the image
+again and parse.
 
 * How it looks like?
 
