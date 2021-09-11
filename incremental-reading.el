@@ -5,7 +5,7 @@
 ;; Created: 10 Sep 2021
 ;; Keywords: anki anki-editor incremental-reading supermemo
 ;; Homepage: https://github.com/vascoferreira25/incremental-reading
-;; Package-Requires: ((org) (ox-html) (anki-editor) (dash) (s) (request))
+;; Package-Requires: ((org) (ox-html) (anki-editor) (dash) (request))
 
 ;; This file is not part of GNU Emacs.
 
