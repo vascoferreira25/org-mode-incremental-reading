@@ -22,7 +22,6 @@
 (require 'ox-html)
 (require 'anki-editor)
 (require 'dash)
-(require 's)
 (require 'request)
 
 
@@ -115,26 +114,37 @@
                      selection-end)))))
 
 
+(defun incremental-reading--transform-field-content (content)
+  "Transform the CONTENT of a field into html."
+  (let* ((contents-begin (org-element-property :contents-begin content))
+         (contents-end (org-element-property :contents-end content)))
+    (cond
+     ((equalp 'src-block (org-element-type content))
+      (org-html-src-block content nil nil))
+     ((and contents-begin contents-end)
+      (or (org-export-string-as 
+           (buffer-substring-no-properties
+            contents-begin
+            contents-end)
+           anki-editor--ox-anki-html-backend
+           t
+           anki-editor--ox-export-ext-plist)
+          ;; Return empty string because empty fields return nil
+          ""))
+     (t ""))))
+
+
 (defun incremental-reading--transform-field (field)
   "Transform a special block FIELD to a field in the anki card
 and return a list with the field-name and the parsed-contents."
-  (let* ((field-name (-first-item (org-element-property :attr_field field)))
+  (let* ((field-name (car (org-element-property :attr_field field)))
          (field-contents (org-element-contents field))
          (parsed-contents
           ;; Transform all the separate paragraphs and elements to a single
           ;; string.
           (--reduce (format "%s\n%s" acc it)
-                    (-map (lambda (content)
-                            (if (equalp 'src-block (org-element-type content))
-                                (org-html-src-block content nil nil)
-                              (org-export-string-as 
-                               (buffer-substring-no-properties
-                                (org-element-property :contents-begin content)
-                                (org-element-property :contents-end content))
-                               anki-editor--ox-anki-html-backend
-                               t
-                               anki-editor--ox-export-ext-plist)))
-                          field-contents))))
+                    (mapcar #'incremental-reading--transform-field-content
+                            field-contents))))
     `(,field-name . ,parsed-contents)))
 
 
@@ -142,7 +152,7 @@ and return a list with the field-name and the parsed-contents."
   "Return all the fields inside an ANKI-BLOCK."
   (org-element-map anki-block 'special-block
     (lambda (field)
-      (when (s-equals? "FIELD" (s-upcase (org-element-property :type field)))
+      (when (string= "FIELD" (upcase (org-element-property :type field)))
         (incremental-reading--transform-field field)))))
 
 
@@ -200,7 +210,8 @@ is successful, update the ANKI-BLOCK id."
   "Parse all the Anki special-blocks in the current buffer and
 send them to Anki through http to the anki-connect addon."
   (interactive)
-  (goto-char (point-max))
+  ;; Store the initial cursor position to set it again after parsing
+  (setq initial-position (point))
   ;; Store a reversed list of the special blocks.
   ;; This is used to write the ids from bottom to top
   (setq anki-blocks (list))
@@ -208,24 +219,26 @@ send them to Anki through http to the anki-connect addon."
   (org-element-map (org-element-parse-buffer) 'special-block
     (lambda (special-block)
       ;; If it is a anki block, get the fields of the card
-      (when (s-equals? "ANKI" (s-upcase (org-element-property :type special-block)))
+      (when (string= "ANKI" (s-upcase (org-element-property :type special-block)))
         (setq anki-blocks (cons special-block anki-blocks)))))
   ;; Avoid errors when inserting the id by sorting the elements from bottom to
   ;; top
   (setq anki-blocks (--sort (> (org-element-property :begin it)
                                (org-element-property :begin other)) anki-blocks))
   ;; Process each anki-block
-  (-map (lambda (anki-block)
-          (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
-                 (id (-first-item (org-element-property :attr_id anki-block)))
-                 (deck (-first-item (org-element-property :attr_deck anki-block)))
-                 (card-type (-first-item (org-element-property :attr_type anki-block)))
-                 (tags (-first-item (org-element-property :attr_tags anki-block))))
-            (if id
-                (incremental-reading--request-update-card id anki-card-fields tags)
-              (incremental-reading--request-add-card deck card-type anki-card-fields tags anki-block)))
-          )
-        anki-blocks))
+  (mapcar (lambda (anki-block)
+            (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
+                   (id (car (org-element-property :attr_id anki-block)))
+                   (deck (car (org-element-property :attr_deck anki-block)))
+                   (card-type (car (org-element-property :attr_type anki-block)))
+                   (tags (car (org-element-property :attr_tags anki-block))))
+              (if id
+                  (incremental-reading--request-update-card id anki-card-fields tags)
+                (incremental-reading--request-add-card deck card-type anki-card-fields tags anki-block)))
+            )
+          anki-blocks)
+  ;; Restore cursor position
+  (goto-char initial-position))
 
 
 (provide 'incremental-reading)
