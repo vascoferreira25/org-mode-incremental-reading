@@ -47,9 +47,77 @@
   :type '(string))
 
 
+(defcustom incremental-reading--basic-template
+  "#+ATTR_DECK: %s
+#+ATTR_TYPE: Basic
+#+ATTR_TAGS: %s
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Front
+#+BEGIN_FIELD
+%s
+#+END_FIELD
+
+#+ATTR_FIELD: Back
+#+BEGIN_FIELD
+#+END_FIELD
+#+END_ANKI
+\n"
+  "The default template for the basic card extract."
+  :type '(string))
+
+
+(defcustom incremental-reading--cloze-template
+  "#+ATTR_DECK: %s
+#+ATTR_TYPE: Cloze
+#+ATTR_TAGS: %s
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Text
+#+BEGIN_FIELD
+%s
+#+END_FIELD
+
+#+ATTR_FIELD: Back Extra
+#+BEGIN_FIELD
+#+END_FIELD
+#+END_ANKI
+\n"
+  "The default template for the cloze card extract."
+  :type '(string))
+
+
+(defun incremental-reading-extract-basic ()
+  "Extract current region into a basic anki card."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--basic-template
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (buffer-substring-no-properties
+                     selection-start
+                     selection-end)))))
+
+
+(defun incremental-reading-extract-cloze ()
+  "Extract current region into a cloze anki card."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--cloze-template
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (buffer-substring-no-properties
+                     selection-start
+                     selection-end)))))
+
+
 (defun incremental-reading--transform-field (field)
   "Transform a special block FIELD to a field in the anki card
-and return a list with the `field-name' and the `parsed-contents'."
+and return a list with the field-name and the parsed-contents."
   (let* ((field-name (-first-item (org-element-property :attr_field field)))
          (field-contents (org-element-contents field))
          (parsed-contents
