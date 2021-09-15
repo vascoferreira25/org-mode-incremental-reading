@@ -3,6 +3,7 @@
 ;; Author: Vasco Ferreira <vasco_mmf@hotmail.com>
 ;; Maintainer: Vasco Ferreira <vasco_mmf@hotmail.com>
 ;; Created: 10 Sep 2021
+;; Version: 0.3
 ;; Keywords: anki anki-editor incremental-reading supermemo
 ;; Homepage: https://github.com/vascoferreira25/incremental-reading
 ;; Package-Requires: ((org) (ox-html) (anki-editor) (request))
@@ -46,7 +47,8 @@
 
 
 (defcustom incremental-reading--basic-template
-  "#+ATTR_DECK: %s
+  ":ANKI-CARD:
+#+ATTR_DECK: %s
 #+ATTR_TYPE: Basic
 #+ATTR_TAGS: %s
 #+BEGIN_ANKI org
@@ -59,13 +61,15 @@
 #+BEGIN_FIELD
 #+END_FIELD
 #+END_ANKI
+:END:
 \n"
   "The default template for the basic card extract."
   :type '(string))
 
 
 (defcustom incremental-reading--cloze-template
-  "#+ATTR_DECK: %s
+  ":ANKI-CARD:
+#+ATTR_DECK: %s
 #+ATTR_TYPE: Cloze
 #+ATTR_TAGS: %s
 #+BEGIN_ANKI org
@@ -78,6 +82,7 @@
 #+BEGIN_FIELD
 #+END_FIELD
 #+END_ANKI
+:END:
 \n"
   "The default template for the cloze card extract."
   :type '(string))
@@ -125,6 +130,36 @@ and return a list with the field-name and the parsed-contents."
         (incremental-reading--transform-field field)))))
 
 
+(defun incremental-reading/add-note-id (anki-block id)
+  "Add the card ID to the ANKI-BLOCK."
+  (goto-char (org-element-property :begin anki-block))
+  (insert (format "#+ATTR_ID: %s\n" id)))
+
+
+(defun incremental-reading--request-add-card (deck card-type fields tags anki-block)
+  "Send an http request to the anki-connect addon with DECK,
+CARD-TYPE, FIELDS, TAGS and ANKI-BLOCK of the card to add. If it
+is successful, update the ANKI-BLOCK id."
+  (request
+    "http://127.0.0.1:8765"
+    :type "POST"
+    :sync t
+    :data (json-encode `(("action" . "addNote")
+                         ("version" . "6")
+                         ("params" . (("note" . (("deckName" . ,deck)
+                                                 ("modelName" . ,card-type)
+                                                 ("fields" . ,fields)
+                                                 ("tags" . (,tags))))))))
+    :headers '(("Content-Type" . "application/json"))
+    :parser 'json-read
+    :success (cl-function
+              (lambda (&key response &allow-other-keys)
+                (message "Added card.")
+                (incremental-reading/add-note-id
+                 anki-block
+                 (cdr (assoc 'result (request-response-data response))))))))
+
+
 (defun incremental-reading--request-update-card (id fields tags)
   "Send an http request to the anki-connect addon with the ID,
 FIELDS and TAGS of the card."
@@ -144,43 +179,11 @@ FIELDS and TAGS of the card."
                 (message "Updated card.")))))
 
 
-(defun incremental-reading/add-note-id (anki-block id)
-  "Add the card ID to the ANKI-BLOCK."
-  (goto-char (org-element-property :begin anki-block))
-  (insert (format "#+ATTR_ID: %s\n" id)))
-
-
-(defun incremental-reading--request-add-card (deck card-type fields tags anki-block)
-  "Send an http request to the anki-connect addon with DECK,
-CARD-TYPE, FIELDS, TAGS and ANKI-BLOCK of the card to add. If it
-is successful, update the ANKI-BLOCK id."
-  (request
-   "http://127.0.0.1:8765"
-   :type "POST"
-   :sync t
-   :data (json-encode `(("action" . "addNote")
-                        ("version" . "6")
-                        ("params" . (("note" . (("deckName" . ,deck)
-                                                ("modelName" . ,card-type)
-                                                ("fields" . ,fields)
-                                                ("tags" . (,tags))))))))
-   :headers '(("Content-Type" . "application/json"))
-   :parser 'json-read
-   :success (cl-function
-             (lambda (&key response &allow-other-keys)
-               (message "Added card.")
-               (incremental-reading/add-note-id
-                anki-block
-                (cdr (assoc 'result (request-response-data response))))))))
-
-
 ;;;###autoload
 (defun incremental-reading-parse-cards ()
   "Parse all the Anki special-blocks in the current buffer and
 send them to Anki through http to the anki-connect addon."
   (interactive)
-  ;; Store the initial cursor position to set it again after parsing
-  (setq initial-position (point))
   ;; Store a reversed list of the special blocks.
   ;; This is used to write the ids from bottom to top
   (setq anki-blocks (list))
@@ -206,11 +209,23 @@ send them to Anki through http to the anki-connect addon."
                    (tags (car (org-element-property :attr_tags anki-block))))
               (if id
                   (incremental-reading--request-update-card id anki-card-fields tags)
-                (incremental-reading--request-add-card deck card-type anki-card-fields tags anki-block)))
-            )
-          anki-blocks)
-  ;; Restore cursor position
-  (goto-char initial-position))
+                (incremental-reading--request-add-card deck
+                                                       card-type
+                                                       anki-card-fields
+                                                       tags
+                                                       anki-block))))
+          anki-blocks))
+
+
+(defun incremental-reading--extract-text (selection-start selection-end)
+  "Extract the substring on region with SELECTION-START and
+  SELECTION-END and return a substring without properties and
+  without links."
+  ;; Replace org-roam links in the text.
+  (replace-regexp-in-string "\\[\\[.*?-.*?-.*?\\]\\[\\(.*?\\)\\]\\]"
+                            "\\1"
+                            (buffer-substring-no-properties selection-start
+                                                            selection-end)))
 
 
 ;;;###autoload
@@ -224,9 +239,8 @@ send them to Anki through http to the anki-connect addon."
     (insert (format incremental-reading--basic-template
                     incremental-reading-default-deck
                     incremental-reading-default-tags
-                    (buffer-substring-no-properties
-                     selection-start
-                     selection-end)))))
+                    (incremental-reading--extract-text selection-start
+                                                       selection-end)))))
 
 
 ;;;###autoload
@@ -240,9 +254,8 @@ send them to Anki through http to the anki-connect addon."
     (insert (format incremental-reading--cloze-template
                     incremental-reading-default-deck
                     incremental-reading-default-tags
-                    (buffer-substring-no-properties
-                     selection-start
-                     selection-end)))))
+                    (incremental-reading--extract-text selection-start
+                                                       selection-end)))))
 
 
 (provide 'incremental-reading)

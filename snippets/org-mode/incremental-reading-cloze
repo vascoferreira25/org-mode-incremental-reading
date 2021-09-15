@@ -3,6 +3,7 @@
 # key: <ir-cloze
 # group: incremental-reading
 # --
+:ANKI_CARD:
 #+ATTR_DECK: ${1:Default}
 #+ATTR_TYPE: ${2:Cloze}
 #+ATTR_TAGS: ${3:incremental-reading}
@@ -17,4 +18,5 @@ ${4:Text {{c1::cloze}}}
 ${5:Back Text}
 #+END_FIELD
 #+END_ANKI
+:END:
 $0
