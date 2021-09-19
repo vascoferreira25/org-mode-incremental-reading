@@ -67,6 +67,24 @@
   :type '(string))
 
 
+(defcustom incremental-reading--basic-template-no-back
+  ":ANKI-CARD:
+#+ATTR_DECK: %s
+#+ATTR_TYPE: Basic
+#+ATTR_TAGS: %s
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Front
+#+BEGIN_FIELD
+%s
+#+END_FIELD
+#+END_ANKI
+:END:
+\n"
+  "The default template for the basic card extract without the
+back field."
+  :type '(string))
+
+
 (defcustom incremental-reading--cloze-template
   ":ANKI-CARD:
 #+ATTR_DECK: %s
@@ -85,6 +103,24 @@
 :END:
 \n"
   "The default template for the cloze card extract."
+  :type '(string))
+
+
+(defcustom incremental-reading--cloze-template-no-back
+  ":ANKI-CARD:
+#+ATTR_DECK: %s
+#+ATTR_TYPE: Cloze
+#+ATTR_TAGS: %s
+#+BEGIN_ANKI org
+#+ATTR_FIELD: Text
+#+BEGIN_FIELD
+%s
+#+END_FIELD
+#+END_ANKI
+:END:
+\n"
+  "The default template for the cloze card extract without the
+back field."
   :type '(string))
 
 
@@ -240,6 +276,22 @@ send them to Anki through http to the anki-connect addon."
 
 
 ;;;###autoload
+(defun incremental-reading-extract-basic-no-back ()
+  "Extract current region into a basic anki card without the back
+field."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--basic-template-no-back
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (incremental-reading--extract-text selection-start
+                                                       selection-end)))))
+
+
+;;;###autoload
 (defun incremental-reading-extract-cloze ()
   "Extract current region into a cloze anki card."
   (interactive)
@@ -248,6 +300,22 @@ send them to Anki through http to the anki-connect addon."
          (selection-end (region-end)))
     (goto-char (org-element-property :end element))
     (insert (format incremental-reading--cloze-template
+                    incremental-reading-default-deck
+                    incremental-reading-default-tags
+                    (incremental-reading--extract-text selection-start
+                                                       selection-end)))))
+
+
+;;;###autoload
+(defun incremental-reading-extract-cloze-no-back ()
+  "Extract current region into a cloze anki card without the back
+field."
+  (interactive)
+  (let* ((element (org-element-at-point))
+         (selection-start (region-beginning))
+         (selection-end (region-end)))
+    (goto-char (org-element-property :end element))
+    (insert (format incremental-reading--cloze-template-no-back
                     incremental-reading-default-deck
                     incremental-reading-default-tags
                     (incremental-reading--extract-text selection-start
