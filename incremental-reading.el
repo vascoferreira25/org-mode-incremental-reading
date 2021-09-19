@@ -219,13 +219,10 @@ send them to Anki through http to the anki-connect addon."
 
 (defun incremental-reading--extract-text (selection-start selection-end)
   "Extract the substring on region with SELECTION-START and
-  SELECTION-END and return a substring without properties and
-  without links."
+  SELECTION-END and return a substring without properties."
   ;; Replace org-roam links in the text.
-  (replace-regexp-in-string "\\[\\[.*?-.*?-.*?\\]\\[\\(.*?\\)\\]\\]"
-                            "\\1"
-                            (buffer-substring-no-properties selection-start
-                                                            selection-end)))
+  (buffer-substring-no-properties selection-start
+                                  selection-end))
 
 
 ;;;###autoload
