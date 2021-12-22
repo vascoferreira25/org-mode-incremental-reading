@@ -129,7 +129,7 @@ back field."
   (let* ((contents-begin (org-element-property :contents-begin content))
          (contents-end (org-element-property :contents-end content)))
     (cond
-     ((equal 'src-block (org-element-type content))
+     ((cl-equalp 'src-block (org-element-type content))
       (org-html-src-block content nil nil))
      ((and contents-begin contents-end)
       (or (org-export-string-as 
