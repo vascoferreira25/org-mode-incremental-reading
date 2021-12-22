@@ -6,7 +6,7 @@
 ;; Version: 0.3
 ;; Keywords: anki anki-editor incremental-reading supermemo
 ;; Homepage: https://github.com/vascoferreira25/incremental-reading
-;; Package-Requires: ((org) (ox-html) (anki-editor) (request))
+;; Package-Requires: ((org) (ox-html) (anki-editor "0.3.3") (request "0.3.0") (emacs "26.6"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -129,7 +129,7 @@ back field."
   (let* ((contents-begin (org-element-property :contents-begin content))
          (contents-end (org-element-property :contents-end content)))
     (cond
-     ((equalp 'src-block (org-element-type content))
+     ((cl-equalp 'src-block (org-element-type content))
       (org-html-src-block content nil nil))
      ((and contents-begin contents-end)
       (or (org-export-string-as 
@@ -237,20 +237,40 @@ send them to Anki through http to the anki-connect addon."
                                    (b-begin (org-element-property :begin b)))
                               (> a-begin b-begin)))))
   ;; Process each anki-block
-  (mapcar (lambda (anki-block)
-            (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
-                   (id (car (org-element-property :attr_id anki-block)))
-                   (deck (car (org-element-property :attr_deck anki-block)))
-                   (card-type (car (org-element-property :attr_type anki-block)))
-                   (tags (car (org-element-property :attr_tags anki-block))))
-              (if id
-                  (incremental-reading--request-update-card id anki-card-fields tags)
-                (incremental-reading--request-add-card deck
-                                                       card-type
-                                                       anki-card-fields
-                                                       tags
-                                                       anki-block))))
+  (mapcar #'incremental-reading-parse-card
           anki-blocks))
+
+(defun incremental-reading-parse-card (anki-block)
+  "Parse one card"
+  (let* ((anki-card-fields (incremental-reading--get-fields anki-block))
+         (id (car (org-element-property :attr_id anki-block)))
+         (deck (car (org-element-property :attr_deck anki-block)))
+         (card-type (car (org-element-property :attr_type anki-block)))
+         (tags (car (org-element-property :attr_tags anki-block))))
+    (when-let*
+        ((current-file
+          (when-let ((f (buffer-file-name)))
+            (abbreviate-file-name f)))
+         (field-name
+          (cond
+           ((string= card-type "Basic") "Back")
+           ((string= card-type "Basic (and reversed card)") "Note")
+           ((string= card-type "Cloze") "Extra")
+           ((string= card-type "Cloze with typed text") "Extra")
+           (t nil)))
+         (field (assoc field-name anki-card-fields)))
+      (setf (alist-get field-name anki-card-fields nil nil #'equal)
+            (concat (cdr field)
+                    (format "<div><hr><p><a href=\"org-protocol://open-file?file=%s\">Source</p></div>"
+                            (url-hexify-string current-file)
+                            (org-html-encode-plain-text current-file)))))
+    (if id
+        (incremental-reading--request-update-card id anki-card-fields tags)
+      (incremental-reading--request-add-card deck
+                                             card-type
+                                             anki-card-fields
+                                             tags
+                                             anki-block))))
 
 
 (defun incremental-reading--extract-text (selection-start selection-end)
