@@ -256,13 +256,13 @@ send them to Anki through http to the anki-connect addon."
           (cond
            ((string= card-type "Basic") "Back")
            ((string= card-type "Basic (and reversed card)") "Note")
-           ((string= card-type "Cloze") "Extra")
-           ((string= card-type "Cloze with typed text") "Extra")
+           ((string= card-type "Cloze") "Back Extra")
+           ((string= card-type "Cloze with typed text") "Back Extra")
            (t nil)))
          (field (assoc field-name anki-card-fields)))
       (setf (alist-get field-name anki-card-fields nil nil #'equal)
             (concat (cdr field)
-                    (format "<div><hr><p><a href=\"org-protocol://open-file?file=%s\">Source</p></div>"
+                    (format "<div><br><p><a href=\"org-protocol://open-file?file=%s\">Source</p></div>"
                             (url-hexify-string current-file)
                             (org-html-encode-plain-text current-file)))))
     (if id
