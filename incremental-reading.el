@@ -248,7 +248,7 @@ send them to Anki through http to the anki-connect addon."
          (deck (car (org-element-property :attr_deck anki-block)))
          (card-type (car (org-element-property :attr_type anki-block)))
          (tags (car (org-element-property :attr_tags anki-block))))
-    (when-let*
+    (if-let*
         ((current-file
           (when-let ((f (buffer-file-name)))
             (abbreviate-file-name f)))
@@ -256,15 +256,17 @@ send them to Anki through http to the anki-connect addon."
           (cond
            ((string= card-type "Basic") "Back")
            ((string= card-type "Basic (and reversed card)") "Note")
-           ((string= card-type "Cloze") "Extra")
-           ((string= card-type "Cloze with typed text") "Extra")
+           ((string= card-type "Cloze") "Back Extra")
+           ((string= card-type "Cloze with typed text") "Back Extra")
            (t nil)))
+         (source-string
+          (format "<div><br><p><a href=\"org-protocol://open-file?file=%s\">Source</p></div>"
+                  (url-hexify-string current-file)
+                  (org-html-encode-plain-text current-file)))
          (field (assoc field-name anki-card-fields)))
-      (setf (alist-get field-name anki-card-fields nil nil #'equal)
-            (concat (cdr field)
-                    (format "<div><hr><p><a href=\"org-protocol://open-file?file=%s\">Source</p></div>"
-                            (url-hexify-string current-file)
-                            (org-html-encode-plain-text current-file)))))
+        (setf (alist-get field-name anki-card-fields nil nil #'equal)
+              (concat (cdr field) source-string))
+      (nconc anki-card-fields `((,field-name . ,source-string))))
     (if id
         (incremental-reading--request-update-card id anki-card-fields tags)
       (incremental-reading--request-add-card deck
