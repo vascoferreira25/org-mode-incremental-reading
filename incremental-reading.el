@@ -360,9 +360,8 @@ field."
               (when (string= "FIELD" (s-upcase (org-element-property :type field)))
                 ;; Get the each field's context begin and end position list.
                 ;; Should looks like: '(1 3 8 19), 1 3 is the first field's begin-end, and etc.
-                (dolist (context (org-element-contents field))
-                  (push (org-element-property :contents-begin context) context-bg-eds)
-                  (push (org-element-property :contents-end context) context-bg-eds)))))
+                (push (org-element-property :contents-begin field) context-bg-eds)
+                (push (org-element-property :contents-end field) context-bg-eds))))
           (push drawer-end produce-list)
           (while context-bg-eds
             (push (pop context-bg-eds) produce-list))
@@ -375,6 +374,7 @@ field."
 
 ;;;###autoload
 (defun incremental-reading-show-properties ()
+  "Show all properties."
   (interactive)
   (remove-overlays
    (point-min) (point-max) 'hidden-anki-prop t)
@@ -382,6 +382,7 @@ field."
 
 ;;;###autoload
 (defun incremental-reading-toggle-properties-display ()
+  "Toggle properties hidden/shown state."
   (interactive)
   (if (eq (get 'incremental-reading-properties-hide-state 'state) 'hidden)
       (incremental-reading-show-properties)
