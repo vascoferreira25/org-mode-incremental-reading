@@ -7,16 +7,15 @@ use that to learn/memorize the contents.
 Anki is an open-source software for Spaced Repetition where you create
 flashcards and then learn them.
 
-There is already on package to connect org-mode to Anki and create flashcards
+There is already a package to connect org-mode to Anki and create flashcards
 based on a specific tree structure. The package is called ~anki-editor~.
 
-However, my notes don't follow that tree structure. Also, I don't want to
-create a separate file to create Anki cards as that would make the notes and
-cards separate from each other. I think it would be better to create a block
-right below my notes that would then be sent to Anki. This way I won't ever
-forget to update my cards when I also update my notes.
+However, not all notes follow that tree structure. Also, instead of separating
+the notes from the flashcards, it would be better to create a block right below
+the notes that would then be sent to Anki. This way you won't ever forget to
+update the flashcards when you update the notes.
 
-This is an example of one of my notes:
+This is an example of how the flashcards work:
 
 #+BEGIN_SRC org
 ,#+title: Return Over Investment
@@ -96,7 +95,8 @@ updated and sent to Anki to learn.
 * Installation
 
 To install this back-end, clone this repo into your packages or private folder
-in your ~~/.emacs.d~ directory. Or use your package manager. For example, ~straight.el~:
+in your ~~/.emacs.d~ directory. Or use your package manager. For example,
+~straight.el~:
 
 #+BEGIN_SRC emacs-lisp
 (straight-use-package
@@ -104,40 +104,41 @@ in your ~~/.emacs.d~ directory. Or use your package manager. For example, ~strai
    :type git :host github :repo "vascoferreira25/org-mode-incremental-reading"))
 #+END_SRC
 
-To configure org-protocol (for going back to the context immediately when reviewing anki cards), you should:
+To configure org-protocol (for going back to the context immediately when
+reviewing anki cards), you should:
 
 1. Follow the guide to setup your ~org-protocol~
    https://orgmode.org/worg/org-contrib/org-protocol.html#org636b514
 2. Add the following code into your ~.emacs~. (Thanks [[https://org-roam.discourse.group/t/org-roam-and-anki/589/4][@telotortium]])
 
-   #+begin_src emacs-lisp
-    ;; org-protocol support for opening a file - needed for ‘my-anki-editor-backlink’.
-    (add-to-list
-    'org-protocol-protocol-alist
-    '("org-open-file" :protocol "open-file" :function org-protocol-open-file))
-    (defun org-protocol-open-file (fname)
-    "Process an org-protocol://open-file?url= style URL with FNAME.
-    Change a filename by mapping URLs to local filenames as set
-    in `org-protocol-project-alist'.
-    The location for a browser's bookmark should look like this:
-    javascript:location.href = \\='org-protocol://open-source?url=\\=' + \\
-            encodeURIComponent(location.href)"
-    ;; As we enter this function for a match on our protocol, the return value
-    ;; defaults to nil.
-    (let ((f (org-protocol-sanitize-uri
-                (plist-get (org-protocol-parse-parameters fname nil '(:file))
-                        :file))))
-        f))
-    #+end_src
+#+begin_src emacs-lisp
+;; org-protocol support for opening a file - needed for ‘my-anki-editor-backlink’.
+(add-to-list
+ 'org-protocol-protocol-alist
+ '("org-open-file" :protocol "open-file" :function org-protocol-open-file))
+(defun org-protocol-open-file (fname)
+  "Process an org-protocol://open-file?url= style URL with FNAME.
+Change a filename by mapping URLs to local filenames as set
+in `org-protocol-project-alist'.
+The location for a browser's bookmark should look like this:
+javascript:location.href = \\='org-protocol://open-file?url=\\=' + \\
+        encodeURIComponent(location.href)"
+  ;; As we enter this function for a match on our protocol, the return value
+  ;; defaults to nil.
+  (let ((f (org-protocol-sanitize-uri
+            (plist-get (org-protocol-parse-parameters fname nil '(:file))
+                       :file))))
+    f))
+#+end_src
 
 * How to use
 
 These are the steps to add/update/extract cards from org-mode into Anki:
 
 1. Load ~anki-editor-mode~.
-2. Go to your notes and either use the snippets to create a block or use the
-   ~incremental-reading-extract-basic~ or ~incremental-reading-extract-cloze~
-   to extract the text and turn it into a card.
+2. Go to your notes and either use snippets to create a block or use the
+   ~incremental-reading-extract-basic~ or ~incremental-reading-extract-cloze~ to
+   extract the text and turn it into a card.
    - Set the ~incremental-reading-default-deck~ and
      ~incremental-reading-default-tags~ so you won't need to change them after
      extracting your notes.
@@ -150,14 +151,25 @@ These are the steps to add/update/extract cards from org-mode into Anki:
 Emacs, it will fail. Try again and it will work.
 
 *Note 2*: sometimes errors occur when sending attachments (images and files) to
-Anki. When that happens, remode the image, parse the cards, add the image
-again and parse.
+Anki. When that happens, remove the image, parse the cards, add the image again
+and parse.
 
-*Note 3*: (New!) a link to the original context in your emacs would be automatically appened into the anki card, which would *only* be followed when you are using anki cards in the computer you made it. It's how it looks:
+*Note 3*: (New!) a link to the original context in your emacs would be
+automatically appened into the anki card, which would *only* be followed when you
+are using anki cards in the computer you made it. It's how it looks:
 
 [[./img/example_source.png]]
 
 * How it looks like?
+
+In this image you can see how the card looks like when using an overlay to hide
+extra info of the card.
+
+[[./img/overlay.png]]
+
+With and without overlay:
+
+[[./img/overlay2.gif]]
 
 [[./img/example_1.png]]
 
