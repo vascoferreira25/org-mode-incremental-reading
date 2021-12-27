@@ -46,6 +46,10 @@
 `incremental-reading-extract-cloze' functions."
   :type '(string))
 
+(defcustom incremental-reading-hide-default-display
+  ">>>>>>\n"
+  "The default string displayed when properties are hidden."
+  :type '(string))
 
 (defcustom incremental-reading--basic-template
   ":ANKI-CARD:
@@ -368,7 +372,7 @@ field."
           (push drawer-begin produce-list)
           (while produce-list
             (let ((ol (make-overlay (pop produce-list) (pop produce-list))))
-              (overlay-put ol 'display "")
+              (overlay-put ol 'display incremental-reading-hide-default-display)
               (overlay-put ol 'hidden-anki-prop t)))
           (put 'incremental-reading-properties-hide-state 'state 'hidden))))))
 
