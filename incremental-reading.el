@@ -344,5 +344,47 @@ field."
                     (incremental-reading--extract-text selection-start
                                                        selection-end)))))
 
+;;;###autoload
+(defun incremental-reading-hide-properties ()
+  "Hide all mess properties."
+  (interactive)
+  (org-element-map (org-element-parse-buffer) 'special-block
+    (lambda (special-block)
+      (when (string= "ANKI" (s-upcase (org-element-property :type special-block)))
+        (let ((drawer-begin (org-element-property :begin special-block))
+              (drawer-end (org-element-property :end special-block))
+              (context-bg-eds (list))
+              (produce-list (list)))
+          (org-element-map special-block 'special-block
+            (lambda (field)
+              (when (string= "FIELD" (s-upcase (org-element-property :type field)))
+                ;; Get the each field's context begin and end position list.
+                ;; Should looks like: '(1 3 8 19), 1 3 is the first field's begin-end, and etc.
+                (dolist (context (org-element-contents field))
+                  (push (org-element-property :contents-begin context) context-bg-eds)
+                  (push (org-element-property :contents-end context) context-bg-eds)))))
+          (push drawer-end produce-list)
+          (while context-bg-eds
+            (push (pop context-bg-eds) produce-list))
+          (push drawer-begin produce-list)
+          (while produce-list
+            (let ((ol (make-overlay (pop produce-list) (pop produce-list))))
+              (overlay-put ol 'display "")
+              (overlay-put ol 'hidden-anki-prop t)))
+          (put 'incremental-reading-properties-hide-state 'state 'hidden))))))
+
+;;;###autoload
+(defun incremental-reading-show-properties ()
+  (interactive)
+  (remove-overlays
+   (point-min) (point-max) 'hidden-anki-prop t)
+  (put 'incremental-reading-properties-hide-state 'state 'shown))
+
+;;;###autoload
+(defun incremental-reading-toggle-properties-display ()
+  (interactive)
+  (if (eq (get 'incremental-reading-properties-hide-state 'state) 'hidden)
+      (incremental-reading-show-properties)
+    (incremental-reading-hide-properties)))
 
 (provide 'incremental-reading)
