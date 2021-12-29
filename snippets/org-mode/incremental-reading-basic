@@ -3,10 +3,10 @@
 # key: <ir-basic
 # group: incremental-reading
 # --
-:ANKI_CARD:
+:ANKI-CARD:
 #+ATTR_DECK: ${1:Default}
 #+ATTR_TYPE: ${2:Basic}
-#+ATTR_TAGS: ${3:incremental-reading}
+#+ATTR_TAGS: ${3:`(incremental-reading-get-tags)`}
 #+BEGIN_ANKI org
 #+ATTR_FIELD: Front
 #+BEGIN_FIELD

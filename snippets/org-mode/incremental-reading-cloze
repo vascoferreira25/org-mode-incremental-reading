@@ -3,10 +3,10 @@
 # key: <ir-cloze
 # group: incremental-reading
 # --
-:ANKI_CARD:
+:ANKI-CARD:
 #+ATTR_DECK: ${1:Default}
 #+ATTR_TYPE: ${2:Cloze}
-#+ATTR_TAGS: ${3:incremental-reading}
+#+ATTR_TAGS: ${3:`(incremental-reading-get-tags)`}
 #+BEGIN_ANKI org
 #+ATTR_FIELD: Text
 #+BEGIN_FIELD
