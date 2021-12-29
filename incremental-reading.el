@@ -287,17 +287,30 @@ send them to Anki through http to the anki-connect addon."
                                   selection-end))
 
 
+(defun incremental-reading-get-tags ()
+  "Get the tags of the current heading."
+  (message "%S" (org-roam-node-tags (org-roam-node-at-point)))
+  (concat incremental-reading-default-tags
+          " "
+          (if (org-roam-node-at-point)
+              (mapconcat 'identity
+                         (org-roam-node-tags (org-roam-node-at-point)) " ")
+            (mapconcat 'identity (split-string (org-get-tags-string) ":" t) " ")
+            )))
+
+
 ;;;###autoload
 (defun incremental-reading-extract-basic ()
   "Extract current region into a basic anki card."
   (interactive)
   (let* ((element (org-element-at-point))
          (selection-start (region-beginning))
-         (selection-end (region-end)))
+         (selection-end (region-end))
+         (tags (incremental-reading-get-tags)))
     (goto-char (org-element-property :end element))
     (insert (format incremental-reading--basic-template
                     incremental-reading-default-deck
-                    incremental-reading-default-tags
+                    tags
                     (incremental-reading--extract-text selection-start
                                                        selection-end)))))
 
@@ -309,44 +322,47 @@ field."
   (interactive)
   (let* ((element (org-element-at-point))
          (selection-start (region-beginning))
-         (selection-end (region-end)))
+         (selection-end (region-end))
+         (tags (incremental-reading-get-tags)))
     (goto-char (org-element-property :end element))
     (insert (format incremental-reading--basic-template-no-back
                     incremental-reading-default-deck
-                    incremental-reading-default-tags
+                    tags
                     (incremental-reading--extract-text selection-start
                                                        selection-end)))))
 
 
 ;;;###autoload
 (defun incremental-reading-extract-cloze ()
-  "Extract current region into a cloze anki card."
-  (interactive)
-  (let* ((element (org-element-at-point))
-         (selection-start (region-beginning))
-         (selection-end (region-end)))
-    (goto-char (org-element-property :end element))
-    (insert (format incremental-reading--cloze-template
-                    incremental-reading-default-deck
-                    incremental-reading-default-tags
-                    (incremental-reading--extract-text selection-start
-                                                       selection-end)))))
+"Extract current region into a cloze anki card."
+(interactive)
+(let* ((element (org-element-at-point))
+       (selection-start (region-beginning))
+       (selection-end (region-end))
+       (tags (incremental-reading-get-tags)))
+  (goto-char (org-element-property :end element))
+  (insert (format incremental-reading--cloze-template
+                  incremental-reading-default-deck
+                  tags
+                  (incremental-reading--extract-text selection-start
+                                                     selection-end)))))
 
 
 ;;;###autoload
 (defun incremental-reading-extract-cloze-no-back ()
-  "Extract current region into a cloze anki card without the back
+"Extract current region into a cloze anki card without the back
 field."
-  (interactive)
-  (let* ((element (org-element-at-point))
-         (selection-start (region-beginning))
-         (selection-end (region-end)))
-    (goto-char (org-element-property :end element))
-    (insert (format incremental-reading--cloze-template-no-back
-                    incremental-reading-default-deck
-                    incremental-reading-default-tags
-                    (incremental-reading--extract-text selection-start
-                                                       selection-end)))))
+(interactive)
+(let* ((element (org-element-at-point))
+       (selection-start (region-beginning))
+       (selection-end (region-end))
+       (tags (incremental-reading-get-tags)))
+  (goto-char (org-element-property :end element))
+  (insert (format incremental-reading--cloze-template-no-back
+                  incremental-reading-default-deck
+                  tags
+                  (incremental-reading--extract-text selection-start
+                                                     selection-end)))))
 
 ;;;###autoload
 (defun incremental-reading-hide-properties ()
