@@ -173,8 +173,9 @@ and return a list with the field-name and the parsed-contents."
 
 (defun incremental-reading/add-note-id (anki-block id)
   "Add the card ID to the ANKI-BLOCK."
-  (goto-char (org-element-property :begin anki-block))
-  (insert (format "#+ATTR_ID: %s\n" id)))
+  (save-excursion
+    (goto-char (org-element-property :begin anki-block))
+    (insert (format "#+ATTR_ID: %s\n" id))))
 
 
 (defun incremental-reading--request-add-card (deck card-type fields tags anki-block)
