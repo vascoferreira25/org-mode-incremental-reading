@@ -190,3 +190,9 @@ With and without overlay:
 [[./img/example_5.png]]
 
 [[./img/example_6.png]]
+
+
+* Thank you for your contributions
+
+- [[https://github.com/colawithsauce][colawithsauce]]
+- [[https://github.com/czqhurricnae][czqhurricnae]]
