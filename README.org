@@ -111,7 +111,7 @@ reviewing anki cards), you should:
    https://orgmode.org/worg/org-contrib/org-protocol.html#org636b514
 2. Add the following code into your ~.emacs~. (Thanks [[https://org-roam.discourse.group/t/org-roam-and-anki/589/4][@telotortium]])
 
-#+begin_src emacs-lisp
+   #+begin_src emacs-lisp
 ;; org-protocol support for opening a file - needed for ‘my-anki-editor-backlink’.
 (add-to-list
  'org-protocol-protocol-alist
@@ -129,6 +129,14 @@ javascript:location.href = \\='org-protocol://open-file?url=\\=' + \\
             (plist-get (org-protocol-parse-parameters fname nil '(:file))
                        :file))))
     f))
+   #+end_src
+
+Start ~incremental-reading-mode~ when openning an org file by using hooks (This
+was sugested by @czqhurricnae):
+
+#+begin_src
+(add-hook 'org-mode-hook #'incremental-reading-mode)
+(add-hook 'incremental-reading-mode-hook #'anki-editor-mode)
 #+end_src
 
 * How to use

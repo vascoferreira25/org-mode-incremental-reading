@@ -409,4 +409,13 @@ field."
       (incremental-reading-show-properties)
     (incremental-reading-hide-properties)))
 
+;; Create a minor mode to make it easier to load incremental-reading through
+;; hooks. This was sugested by `czqhurricnae'.
+;;;###autoload
+(define-minor-mode incremental-reading-mode
+  "incremental-reading-mode"
+  :lighter " incremental-reading")
+
 (provide 'incremental-reading)
+
+;;; incremental-reading.el ends here
