@@ -31,6 +31,7 @@ The ROI is made up of two [[id:c53ffe1e-e390-482f-8f13-e857faf58d38][Metric]]:
 - Net profit over a period of time,
 - Cost of investment
 
+:ANKI-CARD:
 ,#+ATTR_ID: 1631303347034
 ,#+ATTR_DECK: Test
 ,#+ATTR_TYPE: Cloze
@@ -42,6 +43,7 @@ The ROI is made up of two [[id:c53ffe1e-e390-482f-8f13-e857faf58d38][Metric]]:
 investment of a company is going.
 ,#+END_FIELD
 ,#+END_ANKI
+:END:
 
 ,* Common formula
 
@@ -51,6 +53,7 @@ In this formula, ~G~ represents the financial gains you expect from the
 project, and ~C~ represents the up front and ongoing costs of your investment
 in the project.
 
+:ANKI-CARD:
 ,#+ATTR_ID: 1631303346989
 ,#+ATTR_DECK: Test
 ,#+ATTR_TYPE: Basic
@@ -70,11 +73,13 @@ project, and ~C~ represents the up front and ongoing costs of your investment
 in the project.
 ,#+END_FIELD
 ,#+END_ANKI
+:END:
 #+END_SRC
 
 The template of an Anki card is the following:
 
-#+BEGIN_SRC 
+#+BEGIN_SRC
+:ANKI-CARD:
 ,#+ATTR_DECK: Test
 ,#+ATTR_TYPE: Cloze
 ,#+ATTR_TAGS: incremental-reading emacs
@@ -87,6 +92,7 @@ The template of an Anki card is the following:
 ,#+BEGIN_FIELD
 ,#+END_FIELD
 ,#+END_ANKI
+:END:
 #+END_SRC
 
 This way all the cards will be in the same place of the notes and can easily be
@@ -104,11 +110,16 @@ in your ~~/.emacs.d~ directory. Or use your package manager. For example,
    :type git :host github :repo "vascoferreira25/org-mode-incremental-reading"))
 #+END_SRC
 
+In case your package manager doesn't install dependencies, also install the
+following packages:
+
+- ~anki-editor~
+- ~request~
+
 To configure org-protocol (for going back to the context immediately when
 reviewing anki cards), you should:
 
-1. Follow the guide to setup your ~org-protocol~
-   https://orgmode.org/worg/org-contrib/org-protocol.html#org636b514
+1. Follow the guide to setup your ~org-protocol~ in [[https://orgmode.org/worg/org-contrib/org-protocol.html#org636b514][org-protocol.el]].
 2. Add the following code into your ~.emacs~. (Thanks [[https://org-roam.discourse.group/t/org-roam-and-anki/589/4][@telotortium]])
 
    #+begin_src emacs-lisp
@@ -131,7 +142,7 @@ javascript:location.href = \\='org-protocol://open-file?url=\\=' + \\
     f))
    #+end_src
 
-Start ~incremental-reading-mode~ when openning an org file by using hooks (This
+Start ~incremental-reading-mode~ when opening an org file by using hooks (This
 was sugested by @czqhurricnae):
 
 #+begin_src
@@ -141,10 +152,12 @@ was sugested by @czqhurricnae):
 
 * How to use
 
+In the case you don't want to use hooks to start ~incremental-reading~ upon
+opening an org file, load ~incremental-reading-mode~.
+
 These are the steps to add/update/extract cards from org-mode into Anki:
 
-1. Load ~anki-editor-mode~.
-2. Go to your notes and either use snippets to create a block or use the
+1. Go to your notes and either use snippets to create a block or use the
    ~incremental-reading-extract-basic~ or ~incremental-reading-extract-cloze~ to
    extract the text and turn it into a card.
    - Set the ~incremental-reading-default-deck~ and
@@ -152,8 +165,8 @@ These are the steps to add/update/extract cards from org-mode into Anki:
      extracting your notes.
    - For ~cloze~ cards don't forget to create a cloze with
       ~anki-editor-cloze-region~.
-3. Open Anki and make sure you have the ~anki-connect~ add-on.
-4. Use the function ~incremental-reading-parse-cards~.
+2. Open Anki and make sure you have the ~anki-connect~ add-on.
+3. Use the function ~incremental-reading-parse-cards~.
 
 *Note 1*: almost always, the first time you try to parse the cards after loading
 Emacs, it will fail. Try again and it will work.
@@ -162,13 +175,13 @@ Emacs, it will fail. Try again and it will work.
 Anki. When that happens, remove the image, parse the cards, add the image again
 and parse.
 
-*Note 3*: (New!) a link to the original context in your emacs would be
-automatically appened into the anki card, which would *only* be followed when you
-are using anki cards in the computer you made it. It's how it looks:
+*Note 3*: a link to the original context in your Emacs would be automatically
+appended into the anki card, which would *only* be followed when you are using
+anki cards in the computer you made it. This is how it looks:
 
 [[./img/example_source.png]]
 
-* How it looks like?
+* How does it look like?
 
 In this image you can see how the card looks like when using an overlay to hide
 extra info of the card.

@@ -20,6 +20,7 @@
 
 ;;; Dependencies:
 (require 'org)
+(require 'ox-html)
 (require 'org-protocol)
 (require 'anki-editor)
 (require 'request)
