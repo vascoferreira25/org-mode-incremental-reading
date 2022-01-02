@@ -6,7 +6,7 @@
 ;; Version: 0.3
 ;; Keywords: anki anki-editor incremental-reading supermemo
 ;; Homepage: https://github.com/vascoferreira25/incremental-reading
-;; Package-Requires: ((org) (org-protocol) (ox-html) (anki-editor "0.3.3") (request "0.3.0") (emacs "26.6"))
+;; Package-Requires: ((org) (anki-editor "0.3.3") (request "0.3.0") (emacs "26.6"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -21,7 +21,6 @@
 ;;; Dependencies:
 (require 'org)
 (require 'org-protocol)
-(require 'ox-html)
 (require 'anki-editor)
 (require 'request)
 
