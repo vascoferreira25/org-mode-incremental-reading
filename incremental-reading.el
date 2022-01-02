@@ -1,4 +1,4 @@
-;; incremental-reading.el --- SuperMemo inspired incremental reading for org-mode and Anki -*- lexical-binding: t -*-
+;;; incremental-reading.el --- SuperMemo inspired incremental reading for org-mode and Anki -*- lexical-binding: t -*-
 
 ;; Author: Vasco Ferreira <vasco_mmf@hotmail.com>
 ;; Maintainer: Vasco Ferreira <vasco_mmf@hotmail.com>
