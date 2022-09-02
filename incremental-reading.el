@@ -187,7 +187,7 @@ is successful, update the ANKI-BLOCK id."
     :type "POST"
     :sync t
     :data (json-encode `(("action" . "addNote")
-                         ("version" . "6")
+                         ("version" . 6)
                          ("params" . (("note" . (("deckName" . ,deck)
                                                  ("modelName" . ,card-type)
                                                  ("fields" . ,fields)
@@ -210,7 +210,7 @@ FIELDS and TAGS of the card."
     :type "POST"
     :sync t
     :data (json-encode `(("action" . "updateNoteFields")
-                         ("version" . "6")
+                         ("version" . 6)
                          ("params" . (("note" . (("id" . ,(string-to-number id))
                                                  ("fields" . ,fields)
                                                  ("tags" . (,tags))))))))
