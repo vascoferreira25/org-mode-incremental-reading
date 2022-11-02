@@ -187,13 +187,15 @@ is successful, update the ANKI-BLOCK id."
     :type "POST"
     :sync t
     :data (json-encode `(("action" . "addNote")
-                         ("version" . "6")
+                         ("version" . 6)
                          ("params" . (("note" . (("deckName" . ,deck)
                                                  ("modelName" . ,card-type)
                                                  ("fields" . ,fields)
-                                                 ("tags" . (,tags))))))))
+                                                 ("tags" . ,(if tags (split-string tags " ") (list)))))))))
     :headers '(("Content-Type" . "application/json"))
     :parser 'json-read
+    :error (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+                          (message "Error: %s" (string-trim (cdr error-thrown)))))
     :success (cl-function
               (lambda (&key response &allow-other-keys)
                 (message "Added card.")
@@ -210,12 +212,14 @@ FIELDS and TAGS of the card."
     :type "POST"
     :sync t
     :data (json-encode `(("action" . "updateNoteFields")
-                         ("version" . "6")
+                         ("version" . 6)
                          ("params" . (("note" . (("id" . ,(string-to-number id))
                                                  ("fields" . ,fields)
-                                                 ("tags" . (,tags))))))))
+                                                 ("tags" . ,(if tags (split-string tags " ") (list)))))))))
     :headers '(("Content-Type" . "application/json"))
     :parser 'json-read
+    :error (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+                          (message "Error: %s" (string-trim (cdr error-thrown)))))
     :success (cl-function
               (lambda (&key response &allow-other-keys)
                 (message "Updated card.")))))
