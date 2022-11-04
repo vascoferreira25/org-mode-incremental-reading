@@ -169,15 +169,39 @@ These are the steps to add/update/extract cards from org-mode into Anki:
 3. Use the function ~incremental-reading-parse-cards~.
 
 *Note 1*: almost always, the first time you try to parse the cards after loading
-Emacs, it will fail. Try again and it will work.
+Emacs, it will fail. Try again and it will work. If a ~#+ATTR_ID: nil~ appears,
+remove it and try again. A ~nil~ id usually appears when something wrong happened 
+when trying to send the data to anki.
 
 *Note 2*: sometimes errors occur when sending attachments (images and files) to
 Anki. When that happens, remove the image, parse the cards, add the image again
 and parse.
 
-*Note 3*: a link to the original context in your Emacs would be automatically
-appended into the anki card, which would *only* be followed when you are using
-anki cards in the computer you made it. This is how it looks:
+*Note 3*: If you are using a language other than english, then you also need to 
+use the correct language in the names of the card types and fields. For example,
+in french, the card template should look like this:
+
+#+begin_src
+,#+ATTR_DECK: Test
+,#+ATTR_TYPE: Généralités (deux sens)
+,#+ATTR_TAGS: incremental-reading emacs
+,#+BEGIN_ANKI org
+,#+ATTR_FIELD: Recto
+,#+BEGIN_FIELD
+Recto text
+,#+END_FIELD
+
+,#+ATTR_FIELD: Verso
+,#+BEGIN_FIELD
+Verso text
+,#+END_FIELD
+,#+END_ANKI
+#+end_src
+
+*Note 4*: a link to the original context in your Emacs will be automatically
+appended into the anki card, which will *only* work when you are using
+anki cards in the computer you made it as it is where you have Emacs and the 
+file. This is how it looks:
 
 [[./img/example_source.png]]
 
